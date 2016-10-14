@@ -4,35 +4,44 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.ThemedSpinnerAdapter;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-    private static class MyAdapter extends ArrayAdapter<String> implements ThemedSpinnerAdapter {
+public class MainActivity extends BaseActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "MainActivity";
+
+    private static class MyAdapter extends ArrayAdapter<String> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
         private final ThemedSpinnerAdapter.Helper mDropDownHelper;
 
-        public MyAdapter(Context context, String[] objects) {
-            super(context, android.R.layout.simple_list_item_1, objects);
+        public MyAdapter(Context context, FireBaseApplication db) {
+            super(context, android.R.layout.simple_list_item_1);
             mDropDownHelper = new ThemedSpinnerAdapter.Helper(context);
+            db.addMonthsChangeListener(this);
         }
 
         @Override
@@ -61,6 +70,15 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void setDropDownViewTheme(Resources.Theme theme) {
             mDropDownHelper.setDropDownViewTheme(theme);
+        }
+
+        @Override
+        public void monthsChanged(FireBaseApplication.Month[] months) {
+            clear();
+            for(FireBaseApplication.Month m : months) {
+                add(m.getName());
+                Log.d(TAG, m.getName() + " - " + m.getStart());
+            }
         }
     }
 
@@ -105,6 +123,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -128,12 +147,7 @@ public class MainActivity extends AppCompatActivity
 
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setAdapter(new MainActivity.MyAdapter(
-                toolbar.getContext(),
-                new String[]{
-                        "2016 June",
-                        "2016 July",
-                        "2016 August",
-                }));
+                toolbar.getContext(), (FireBaseApplication)getApplication()));
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -141,7 +155,7 @@ public class MainActivity extends AppCompatActivity
                 // When the given dropdown item is selected, show its contents in the
                 // container view.
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.content_main, MainActivity.PlaceholderFragment.newInstance(position + 1))
+                        .replace(R.id.container, MainActivity.PlaceholderFragment.newInstance(position + 1))
                         .commit();
             }
 
@@ -150,7 +164,32 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                if(currentUser == null)
+                    startActivity(new Intent(MainActivity.this, GoogleSignInActivity.class));
+                else
+                    updateUser(currentUser);
+            }
+        });
+    }
 
+    private void updateUser(FirebaseUser currentUser) {
+        Log.d(TAG, "User changed: "+currentUser!=null?currentUser.getDisplayName():"null");
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View header=navigationView.getHeaderView(0);
+
+        ((TextView) header.findViewById(R.id.nameView)).setText(currentUser.getDisplayName());
+        ((TextView) header.findViewById(R.id.emailView)).setText(currentUser.getEmail());
+        ((ImageView) header.findViewById(R.id.imageView)).setImageURI(currentUser.getPhotoUrl());
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.w(TAG, "ConnectionResult" + connectionResult);
     }
 
     @Override
@@ -204,10 +243,32 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        } else if (id == R.id.sign_out_button) {
+            signOut();
+
+        } else if (id == R.id.disconnect_button) {
+            revokeAccess();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void signOut() {
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google sign out
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+    }
+
+    private void revokeAccess() {
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google revoke access
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
+    }
+
 }

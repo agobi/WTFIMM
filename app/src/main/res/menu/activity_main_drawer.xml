@@ -33,4 +33,13 @@
         </menu>
     </item>
 
+    <item android:title="Account">
+        <menu>
+            <item android:id="@+id/sign_out_button"
+                android:title="@string/sign_out" />
+            <item android:id="@+id/disconnect_button"
+                android:title="@string/disconnect" />
+        </menu>
+    </item>
+
 </menu>
