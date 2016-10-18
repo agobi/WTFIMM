@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -35,13 +34,18 @@ public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
 
-    private static class MyAdapter extends ArrayAdapter<String> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
+    private static class MyAdapter extends ArrayAdapter<FireBaseApplication.Month> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
         private final ThemedSpinnerAdapter.Helper mDropDownHelper;
+        private final LayoutInflater mInflater;
+        private FireBaseApplication.Month months[] = null;
+        private final FireBaseApplication app;
 
-        public MyAdapter(Context context, FireBaseApplication db) {
+        public MyAdapter(Context context, FireBaseApplication app) {
             super(context, android.R.layout.simple_list_item_1);
+            this.app = app;
             mDropDownHelper = new ThemedSpinnerAdapter.Helper(context);
-            db.addMonthsChangeListener(this);
+            app.addMonthsChangeListener(this);
+            mInflater = LayoutInflater.from(context);
         }
 
         @Override
@@ -57,7 +61,23 @@ public class MainActivity extends BaseActivity
             }
 
             TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            textView.setText(getItem(position));
+            textView.setText(getItem(position).getName());
+
+            return view;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view;
+
+            if (convertView == null) {
+                view = mInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            } else {
+                view = convertView;
+            }
+
+            ((TextView) view).setText(getItem(position).getName());
 
             return view;
         }
@@ -74,50 +94,15 @@ public class MainActivity extends BaseActivity
 
         @Override
         public void monthsChanged(FireBaseApplication.Month[] months) {
+            this.months = months;
+
             clear();
-            for(FireBaseApplication.Month m : months) {
-                add(m.getName());
-                Log.d(TAG, m.getName() + " - " + m.getStart());
+            for(int i=months.length-1; i>=0; --i) {
+                add(months[i]);
             }
         }
     }
 
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static MainActivity.PlaceholderFragment newInstance(int sectionNumber) {
-            MainActivity.PlaceholderFragment fragment = new MainActivity.PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_trlist, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            for(int i=0; i<100; ++i)
-                textView.append(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,8 +139,10 @@ public class MainActivity extends BaseActivity
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // When the given dropdown item is selected, show its contents in the
                 // container view.
+
+                FireBaseApplication.Month month = (FireBaseApplication.Month) parent.getAdapter().getItem(position);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, MainActivity.PlaceholderFragment.newInstance(position + 1))
+                        .replace(R.id.content_main, TRListFragment.newInstance(month))
                         .commit();
             }
 
