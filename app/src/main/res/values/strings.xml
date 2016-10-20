@@ -97,5 +97,15 @@
     <string name="sign_out">Sign Out</string>
     <string name="disconnect">Disconnect</string>
     <string name="loading">Loading…</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="editTransaction">Edit</string>
+    <string name="createTransaction">Create</string>
+    <string name="create">Create</string>
+    <string name="edit_note_hint">Note</string>
+    <string name="edit_source_hint">Source</string>
+    <string name="edit_target_hint">Target</string>
+    <string name="edit_amount_hint">Amount</string>
+    <string name="edit_date_hint">Date</string>
 
 </resources>

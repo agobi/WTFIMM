@@ -32,8 +32,8 @@ public class FireBaseApplication extends Application {
     private DatabaseReference trRef;
     private DatabaseReference catRef;
 
-    static class Transaction {
-        public long timestamp;
+    static class Transaction implements Serializable {
+        long timestamp;
         public int amount;
         public String source, target, note, emailid;
 

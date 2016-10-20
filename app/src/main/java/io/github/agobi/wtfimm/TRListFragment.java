@@ -2,10 +2,10 @@ package io.github.agobi.wtfimm;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +47,10 @@ public class TRListFragment extends Fragment {
         return fragment;
     }
 
+    private static interface OnClickListenerFactory {
+        public View.OnClickListener create(FireBaseApplication.Transaction t);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,20 +62,38 @@ public class TRListFragment extends Fragment {
 
         FireBaseApplication.Month m = (FireBaseApplication.Month)getArguments().getSerializable(ARG_MONTH);
         FireBaseApplication app = (FireBaseApplication)getActivity().getApplication();
-        mRecyclerView.setAdapter(new MyAdapter(m, app));
+        mRecyclerView.setAdapter(new MyAdapter(m, app, new OnClickListenerFactory() {
+            @Override
+            public View.OnClickListener create(final FireBaseApplication.Transaction t) {
+                return new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        transactionClicked(v, t);
+                    }
+                };
+            }
+        }));
 
         return rootView;
     }
 
+    private void transactionClicked(View v, FireBaseApplication.Transaction t) {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        TREditDialog tredit = TREditDialog.createDialog(t);
+        tredit.show(fragmentManager, "dialog");
+    }
+
 
     private static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolderBase> implements ValueEventListener, FireBaseApplication.CategoryChangeListener {
-        private static String LOG_TAG = "MyRecyclerViewAdapter";
+        private final OnClickListenerFactory onClickListenerFactory;
         private Map<String, FireBaseApplication.Category> categories;
         private ArrayList<Object> mData = new ArrayList<>();
+        private static String LOG_TAG = "MyRecyclerViewAdapter";
 
-        public MyAdapter(FireBaseApplication.Month m, FireBaseApplication app) {
+        public MyAdapter(FireBaseApplication.Month m, FireBaseApplication app, OnClickListenerFactory onClickListenerFactory) {
             app.getMonth(m).addValueEventListener(this);
             app.addCategoryChangeListener(this);
+            this.onClickListenerFactory = onClickListenerFactory;
         }
 
         public abstract class ViewHolderBase extends RecyclerView.ViewHolder {
@@ -79,7 +101,7 @@ public class TRListFragment extends Fragment {
                 super(itemView);
             }
 
-            public abstract void setData(Object data);
+            public abstract void setData(Object data, OnClickListenerFactory factory);
         }
 
         public class SeparatorViewHolder extends ViewHolderBase {
@@ -91,7 +113,7 @@ public class TRListFragment extends Fragment {
             }
 
             @Override
-            public void setData(Object data) {
+            public void setData(Object data, OnClickListenerFactory factory) {
                 sepLabel.setText((String)data);
             }
         }
@@ -112,14 +134,20 @@ public class TRListFragment extends Fragment {
                 trNote = (TextView) itemView.findViewById(R.id.trNote);
             }
 
+            public FireBaseApplication.Category getCategory(String key) {
+                FireBaseApplication.Category cat = categories.get(key);
+                return cat != null ? cat : FireBaseApplication.defaultCategory;
+            }
+
             @Override
-            public void setData(Object data) {
+            public void setData(Object data, OnClickListenerFactory factory) {
                 FireBaseApplication.Transaction tr = (FireBaseApplication.Transaction)data;
                 trTime.setText(DateFormat.format("HH:mm", tr.timestamp*1000));
-                trSource.setText(categories.getOrDefault(tr.source, FireBaseApplication.defaultCategory).name);
+                trSource.setText(getCategory(tr.source).name);
                 trDestination.setText(categories.get(tr.target).name);
                 trAmount.setText(Integer.toString(tr.amount)+" Ft");
                 trNote.setText(tr.note);
+                itemView.setOnClickListener(factory.create(tr));
             }
         }
 
@@ -139,14 +167,13 @@ public class TRListFragment extends Fragment {
                     break;
             }
 
-            Log.d(TAG, "Returning " + viewHolder + " for " + viewType);
-
             return viewHolder;
         }
 
         @Override
         public void onBindViewHolder(ViewHolderBase holder, int position) {
-            holder.setData(mData.get(position));
+            final Object data = mData.get(position);
+            holder.setData(data, onClickListenerFactory);
         }
 
         @Override
