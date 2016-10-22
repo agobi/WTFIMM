@@ -5,23 +5,29 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <TextView
+        style="@style/InputLabel"
+        android:id="@+id/edit_date_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_date_hint"/>
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.design.widget.TextInputLayout
+        <TextView
+            style="@style/Widget.AppCompat.EditText"
             android:id="@+id/edit_date"
-            android:inputType="number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-            <android.support.design.widget.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="datetime"
-                android:hint="@string/edit_date_hint"/>
-        </android.support.design.widget.TextInputLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
+        <TextView
+            style="@style/Widget.AppCompat.EditText"
+            android:clickable="true"
+            android:id="@+id/edit_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <android.support.design.widget.TextInputLayout

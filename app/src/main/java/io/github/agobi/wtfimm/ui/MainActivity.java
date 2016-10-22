@@ -1,4 +1,4 @@
-package io.github.agobi.wtfimm;
+package io.github.agobi.wtfimm.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -30,26 +29,37 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.DateFormat;
+import java.util.Date;
+
+import io.github.agobi.wtfimm.FireBaseApplication;
+import io.github.agobi.wtfimm.R;
+import io.github.agobi.wtfimm.model.Month;
+import io.github.agobi.wtfimm.model.Transaction;
+
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
 
-    private static class MyAdapter extends ArrayAdapter<FireBaseApplication.Month> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
+    private static class MyAdapter extends ArrayAdapter<Month> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
         private final ThemedSpinnerAdapter.Helper mDropDownHelper;
         private final LayoutInflater mInflater;
-        private FireBaseApplication.Month months[] = null;
-        private final FireBaseApplication app;
+        private final DateFormat formatter;
 
-        public MyAdapter(Context context, FireBaseApplication app) {
+        MyAdapter(Context context, FireBaseApplication app) {
             super(context, android.R.layout.simple_list_item_1);
-            this.app = app;
             mDropDownHelper = new ThemedSpinnerAdapter.Helper(context);
             app.addMonthsChangeListener(this);
             mInflater = LayoutInflater.from(context);
+            formatter = app.getSettings().getMonthFormat();
+        }
+
+        private String formatDate(long timestamp) {
+            return formatter.format(new Date(timestamp*1000));
         }
 
         @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
             View view;
 
             if (convertView == null) {
@@ -61,14 +71,18 @@ public class MainActivity extends BaseActivity
             }
 
             TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            textView.setText(getItem(position).getName());
+            Month m = getItem(position);
+            if(m != null)
+                textView.setText(formatDate(m.getStart()));
+            else
+                Log.w(TAG, "Month is null in getView!");
 
             return view;
         }
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             View view;
 
             if (convertView == null) {
@@ -77,7 +91,11 @@ public class MainActivity extends BaseActivity
                 view = convertView;
             }
 
-            ((TextView) view).setText(getItem(position).getName());
+            Month m = getItem(position);
+            if(m != null)
+                ((TextView) view).setText(formatDate(m.getStart()));
+            else
+                Log.w(TAG, "Month is null in getView!");
 
             return view;
         }
@@ -93,9 +111,7 @@ public class MainActivity extends BaseActivity
         }
 
         @Override
-        public void monthsChanged(FireBaseApplication.Month[] months) {
-            this.months = months;
-
+        public void monthsChanged(Month[] months) {
             clear();
             for(int i=months.length-1; i>=0; --i) {
                 add(months[i]);
@@ -116,8 +132,17 @@ public class MainActivity extends BaseActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                TREditDialog tredit = TREditDialog.createDialog(null);
+
+                tredit.setTransactionSaveListener(new TREditDialog.TransactionSaveListener() {
+                    @Override
+                    public void onTREditSave(Transaction transaction) {
+                        ((FireBaseApplication)getApplication()).getTransactions().push().setValue(transaction);
+                    }
+                });
+
+                tredit.show(getSupportFragmentManager(), "dialog");
             }
         });
 
@@ -140,7 +165,7 @@ public class MainActivity extends BaseActivity
                 // When the given dropdown item is selected, show its contents in the
                 // container view.
 
-                FireBaseApplication.Month month = (FireBaseApplication.Month) parent.getAdapter().getItem(position);
+                Month month = (Month) parent.getAdapter().getItem(position);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.content_main, TRListFragment.newInstance(month))
                         .commit();
@@ -164,14 +189,16 @@ public class MainActivity extends BaseActivity
     }
 
     private void updateUser(FirebaseUser currentUser) {
-        Log.d(TAG, "User changed: "+currentUser!=null?currentUser.getDisplayName():"null");
+        Log.d(TAG, "User changed: "+(currentUser!=null?currentUser.getDisplayName():"null"));
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header=navigationView.getHeaderView(0);
 
-        ((TextView) header.findViewById(R.id.nameView)).setText(currentUser.getDisplayName());
-        ((TextView) header.findViewById(R.id.emailView)).setText(currentUser.getEmail());
-        ((ImageView) header.findViewById(R.id.imageView)).setImageURI(currentUser.getPhotoUrl());
+        if(currentUser != null) {
+            ((TextView) header.findViewById(R.id.nameView)).setText(currentUser.getDisplayName());
+            ((TextView) header.findViewById(R.id.emailView)).setText(currentUser.getEmail());
+            ((ImageView) header.findViewById(R.id.imageView)).setImageURI(currentUser.getPhotoUrl());
+        }
     }
 
     @Override
@@ -214,7 +241,7 @@ public class MainActivity extends BaseActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 

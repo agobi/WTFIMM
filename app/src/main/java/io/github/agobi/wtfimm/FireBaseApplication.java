@@ -1,6 +1,7 @@
 package io.github.agobi.wtfimm;
 
 import android.app.Application;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.res.Configuration;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -13,7 +14,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -23,36 +23,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * Created by gobi on 10/11/16.
- */
+import io.github.agobi.wtfimm.model.Category;
+import io.github.agobi.wtfimm.model.Month;
+import io.github.agobi.wtfimm.model.Transaction;
+
 public class FireBaseApplication extends Application {
     private static final String TAG = "FireBaseApplication";
-    private static int startOfMonth = 5;
-    private DatabaseReference trRef;
-    private DatabaseReference catRef;
-
-    static class Transaction implements Serializable {
-        long timestamp;
-        public int amount;
-        public String source, target, note, emailid;
-
-        public Transaction() {}
-
-        @Override
-        public String toString() {
-            return "Transaction["+timestamp+", "+amount+" "+source+" -> "+target+" ("+note+")]";
-        }
-    }
+    private DatabaseReference transactionsReference;
+    private DatabaseReference categoriesReference;
+    private WTFIMMSettings mSettings;
 
     public static final Category defaultCategory = new Category("???");
-    static class Category {
-        public Category() {}
-        public Category(String name) { this.name = name; }
-        public String name;
+
+    public DatabaseReference getTransactions() {
+        return transactionsReference;
     }
 
-    interface CategoryChangeListener {
+    public interface CategoryChangeListener {
         void categoryChange(Map<String, Category> categories);
     }
     private final List<CategoryChangeListener> categoryChangeListeners = new ArrayList<>();;
@@ -73,56 +60,10 @@ public class FireBaseApplication extends Application {
     }
 
 
-    static String getDay(Long timestamp) {
+    public static String getDay(Long timestamp) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(timestamp*1000);
         return DateFormat.format("MM-dd", cal).toString();
-    }
-
-    static class Month implements Comparable<Month>, Serializable {
-        private final String name;
-        private final long start, end;
-
-        public Month(Long timestamp) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(timestamp*1000);
-            cal.add(Calendar.DAY_OF_MONTH, -startOfMonth+1);
-            Calendar mc = Calendar.getInstance();
-            mc.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), startOfMonth, 0, 0, 0);
-            mc.set(Calendar.MILLISECOND ,0);
-            name = DateFormat.format("yyyy-MM", mc).toString();
-            start = mc.getTimeInMillis() / 1000;
-
-            mc.add(Calendar.MONTH, 1);
-            end = mc.getTimeInMillis() / 1000;
-        }
-
-        @Override
-        public int compareTo(Month o) {
-            return (int)(o.start - start);
-        }
-
-        @Override
-        public int hashCode() {
-            return (int)(start^(start>>>32));
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj instanceof  Month) {
-                Month other = (Month)obj;
-                return start == other.start;
-            }
-            return false;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public long getStart() {
-            return start;
-        }
     }
 
     public interface MonthsChangeListener {
@@ -150,16 +91,19 @@ public class FireBaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        mSettings = new WTFIMMSettings(getApplicationContext());
+
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.setPersistenceEnabled(true);
 
-        trRef = database.getReference("transactions");
-        trRef.keepSynced(true);
-        trRef.addChildEventListener(new ChildEventListener() {
+        transactionsReference = database.getReference("transactions");
+        transactionsReference.keepSynced(true);
+        transactionsReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Transaction data = dataSnapshot.getValue(Transaction.class);
-                if(months.add(new Month(data.timestamp))) {
+                Log.d(TAG, data.toString());
+                if(months.add(new Month(data.getDate(), getSettings().getStartOfMonth()))) {
                     for (MonthsChangeListener m : monthsChangeListeners) {
                         m.monthsChanged(months.toArray(new Month[0]));
                     }
@@ -187,9 +131,9 @@ public class FireBaseApplication extends Application {
             }
         });
 
-        catRef = database.getReference("categories");
-        catRef.keepSynced(true);
-        catRef.addValueEventListener(new ValueEventListener() {
+        categoriesReference = database.getReference("categories");
+        categoriesReference.keepSynced(true);
+        categoriesReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, Category> newData = new HashMap<String, Category>();
@@ -211,7 +155,7 @@ public class FireBaseApplication extends Application {
     }
 
     public Query getMonth(Month m) {
-        Query q = trRef.orderByChild("timestamp").startAt(m.start).endAt(m.end);
+        Query q = transactionsReference.orderByChild("timestamp").startAt(m.getStart()).endAt(m.getEnd());
         return q;
     }
 
@@ -219,5 +163,9 @@ public class FireBaseApplication extends Application {
     public void onConfigurationChanged(Configuration newConfig) {
         Log.d(TAG, "Config changed");
         super.onConfigurationChanged(newConfig);
+    }
+
+    public WTFIMMSettings getSettings() {
+        return mSettings;
     }
 }

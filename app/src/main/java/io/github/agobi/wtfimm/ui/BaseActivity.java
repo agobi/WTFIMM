@@ -1,4 +1,4 @@
-package io.github.agobi.wtfimm;
+package io.github.agobi.wtfimm.ui;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +14,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
+
+import io.github.agobi.wtfimm.R;
 
 /**
  * Created by gobi on 10/10/16.
