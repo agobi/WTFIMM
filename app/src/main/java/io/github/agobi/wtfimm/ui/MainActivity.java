@@ -158,6 +158,7 @@ public class MainActivity extends BaseActivity
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setAdapter(new MainActivity.MyAdapter(
                 toolbar.getContext(), (FireBaseApplication)getApplication()));
+        spinner.setVisibility(View.INVISIBLE);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -245,17 +246,15 @@ public class MainActivity extends BaseActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.menu_accounts) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.menu_budgets) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.menu_categories) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.menu_overview) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.menu_transactions) {
 
         } else if (id == R.id.sign_out_button) {
             signOut();
