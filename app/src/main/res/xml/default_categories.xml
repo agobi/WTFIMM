@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Categories>
+    <Category name="account">
+        <SubCategory name="cash" />
+        <SubCategory name="maestro" />
+        <SubCategory name="mastercard" />
+    </Category>
+
+    <Category name="income">
+        <SubCategory name="salary" />
+        <SubCategory name="interest" />
+    </Category>
+    
+    <Category name="uncategorised"/>
+    <Category name="food">
+        <SubCategory name="breakfast"/>
+        <SubCategory name="lunch"/>
+        <SubCategory name="dinner"/>
+        <SubCategory name="shop" />
+    </Category>
+</Categories>

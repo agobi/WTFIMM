@@ -1,15 +1,33 @@
 package io.github.agobi.wtfimm.ui;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ThemedSpinnerAdapter;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 import io.github.agobi.wtfimm.FireBaseApplication;
 import io.github.agobi.wtfimm.R;
@@ -20,13 +38,15 @@ import io.github.agobi.wtfimm.util.TransactionListAdapter;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class TRListFragment extends Fragment {
-    /**
+public class TRListFragment extends FragmentBase {
+
+    /*
      * The fragment argument representing the section number for this
      * fragment.
      */
     private static final String ARG_MONTH = "month";
-    private RecyclerView mRecyclerView;
+    private TransactionListAdapter adapter;
+    private OnTransactionSelectedListeners mListener;
 
     public TRListFragment() {
     }
@@ -53,38 +73,62 @@ public class TRListFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.fragment_trlist, container, false);
-        mRecyclerView = (RecyclerView)rootView.findViewById(R.id.trlist);
+        FireBaseApplication app = (FireBaseApplication) getActivity().getApplication();
+        RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.trlist);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         Month m = (Month)getArguments().getSerializable(ARG_MONTH);
-        FireBaseApplication app = (FireBaseApplication)getActivity().getApplication();
-        mRecyclerView.setAdapter(new TransactionListAdapter(m, app, new OnClickListenerFactory() {
+        adapter = new TransactionListAdapter(m, app, new OnClickListenerFactory() {
             @Override
             public View.OnClickListener create(final DataSnapshot t) {
                 return new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        transactionClicked(v, t);
+                        mListener.onTransactionSelected(t);
                     }
                 };
             }
 
-        }));
+        });
+        mRecyclerView.setAdapter(adapter);
 
         return rootView;
     }
 
-    private void transactionClicked(View v, final DataSnapshot data) {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        TREditDialog tredit = TREditDialog.createDialog(data.getValue(Transaction.class));
+    interface OnTransactionSelectedListeners {
+        void onTransactionSelected(DataSnapshot data);
+    }
 
-        tredit.setTransactionSaveListener(new TREditDialog.TransactionSaveListener() {
-            @Override
-            public void onTREditSave(Transaction transaction) {
-                data.getRef().setValue(transaction);
-            }
-        });
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnTransactionSelectedListeners) {
+            mListener = (OnTransactionSelectedListeners) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
 
-        tredit.show(fragmentManager, "dialog");
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(adapter != null)
+            adapter.cleanup();
+    }
+
+    @Override
+    protected void onBaseCreated(BaseActivity context) {
+        context.setFabVisible(true);
+        context.setSpinnerVisible(true);
     }
 }

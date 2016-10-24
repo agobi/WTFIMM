@@ -19,19 +19,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import io.github.agobi.wtfimm.FireBaseApplication;
 import io.github.agobi.wtfimm.R;
-import io.github.agobi.wtfimm.model.Category;
 import io.github.agobi.wtfimm.model.Transaction;
 import io.github.agobi.wtfimm.util.TimePickerBehaviour;
 
 public class TREditDialog extends AppCompatDialogFragment {
     private static final String TAG = "EditDialog";
     private static final String TRANSACTION_KEY = "TRANSACTION_KEY";
-    private final List<String> categoryIds = new ArrayList<>(), catNames = new ArrayList<>();
+    private final List<String> categoryIds = new ArrayList<>();
     private TransactionSaveListener transactionSaveListener;
 
     public static TREditDialog createDialog(Transaction t) {
@@ -60,10 +59,11 @@ public class TREditDialog extends AppCompatDialogFragment {
         final Transaction tr = tr2 == null ? new Transaction() : tr2;
 
         FireBaseApplication app = (FireBaseApplication) getActivity().getApplication();
-        for(Map.Entry<String, Category> x : app.getCategories().entrySet()) {
-            categoryIds.add(x.getKey());
-            catNames.add(x.getValue().getName());
-        }
+        List<String> keys = new ArrayList<>(app.getCategories().keySet());
+        Collections.sort(keys);
+        for(String x : keys)
+            categoryIds.add(x);
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
@@ -71,7 +71,7 @@ public class TREditDialog extends AppCompatDialogFragment {
         View v = inflater.inflate(R.layout.tredit, null);
 
         ArrayAdapter<String> adapter =
-            new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, catNames);
+            new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, categoryIds);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         final Spinner source = (Spinner) v.findViewById(R.id.source);
@@ -108,7 +108,6 @@ public class TREditDialog extends AppCompatDialogFragment {
         } else {
             source.setSelection(getCatIndex(app.getSettings().getDefaultSource()));
             target.setSelection(getCatIndex(app.getSettings().getDefaultTarget()));
-            editAmount.setText("0");
         }
 
         timePicker.setDateView(editDate, app.getSettings().getDateFormat());
@@ -182,7 +181,7 @@ public class TREditDialog extends AppCompatDialogFragment {
     }
 
     interface TransactionSaveListener {
-        public void onTREditSave(Transaction transaction);
+        void onTREditSave(Transaction transaction);
     }
 
     public void setTransactionSaveListener(TransactionSaveListener transactionSaveListener) {

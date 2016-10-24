@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -28,6 +30,8 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -38,9 +42,15 @@ import io.github.agobi.wtfimm.model.Month;
 import io.github.agobi.wtfimm.model.Transaction;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, TRListFragment.OnTransactionSelectedListeners {
     private static final String TAG = "MainActivity";
+    private Spinner spinner;
+    private FireBaseApplication application;
+    private FloatingActionButton fab;
+    private ActionBarDrawerToggle toggle;
 
+
+    /* Month spinner in toolbox */
     private static class MyAdapter extends ArrayAdapter<Month> implements ThemedSpinnerAdapter, FireBaseApplication.MonthsChangeListener {
         private final ThemedSpinnerAdapter.Helper mDropDownHelper;
         private final LayoutInflater mInflater;
@@ -119,7 +129,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,54 +137,20 @@ public class MainActivity extends BaseActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                TREditDialog tredit = TREditDialog.createDialog(null);
-
-                tredit.setTransactionSaveListener(new TREditDialog.TransactionSaveListener() {
-                    @Override
-                    public void onTREditSave(Transaction transaction) {
-                        ((FireBaseApplication)getApplication()).getTransactions().push().setValue(transaction);
-                    }
-                });
-
-                tredit.show(getSupportFragmentManager(), "dialog");
-            }
-        });
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        application = (FireBaseApplication) getApplication();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-        toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView =  (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        spinner = (Spinner) findViewById(R.id.spinner);
         spinner.setAdapter(new MainActivity.MyAdapter(
-                toolbar.getContext(), (FireBaseApplication)getApplication()));
-        spinner.setVisibility(View.INVISIBLE);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // When the given dropdown item is selected, show its contents in the
-                // container view.
-
-                Month month = (Month) parent.getAdapter().getItem(position);
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.content_main, TRListFragment.newInstance(month))
-                        .commit();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+                toolbar.getContext(), application));
 
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
@@ -187,6 +162,14 @@ public class MainActivity extends BaseActivity
                     updateUser(currentUser);
             }
         });
+
+
+        if(savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_main, OverviewFragment.newInstance())
+                    .commit();
+            navigationView.getMenu().getItem(0).setChecked(true);
+        }
     }
 
     private void updateUser(FirebaseUser currentUser) {
@@ -200,6 +183,12 @@ public class MainActivity extends BaseActivity
             ((TextView) header.findViewById(R.id.emailView)).setText(currentUser.getEmail());
             ((ImageView) header.findViewById(R.id.imageView)).setImageURI(currentUser.getPhotoUrl());
         }
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        toggle.syncState();
     }
 
     @Override
@@ -247,15 +236,15 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.menu_accounts) {
-
+            
         } else if (id == R.id.menu_budgets) {
 
         } else if (id == R.id.menu_categories) {
 
         } else if (id == R.id.menu_overview) {
-
+            setupOverviewFragment();
         } else if (id == R.id.menu_transactions) {
-
+            setupTRListFragment();
         } else if (id == R.id.sign_out_button) {
             signOut();
 
@@ -266,6 +255,79 @@ public class MainActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void setupOverviewFragment() {
+        showFragment(OverviewFragment.newInstance());
+    }
+
+    private void setupTRListFragment() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // When the given dropdown item is selected, show its contents in the
+                // container view.
+
+                Month month = (Month) parent.getAdapter().getItem(position);
+                showFragment(TRListFragment.newInstance(month));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        Month month = (Month) spinner.getAdapter().getItem(spinner.getSelectedItemPosition());
+        showFragment(TRListFragment.newInstance(month));
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTransaction(null);
+            }
+        });
+    }
+
+
+    private void editTransaction(@Nullable final DataSnapshot data) {
+        Transaction tr = data == null?null:data.getValue(Transaction.class);
+        final DatabaseReference ref = data == null?application.getTransactions().push():data.getRef();
+
+        TREditDialog tredit = TREditDialog.createDialog(tr);
+        tredit.setTransactionSaveListener(new TREditDialog.TransactionSaveListener() {
+            @Override
+            public void onTREditSave(Transaction transaction) {
+                ref.setValue(transaction);
+            }
+        });
+
+        tredit.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onTransactionSelected(DataSnapshot data) {
+        editTransaction(data);
+    }
+
+    @Override
+    public void setFabVisible(boolean fabVisible) {
+        Log.d(TAG, "SetfabVisible "+fabVisible);
+        int fabVisibility = fabVisible?View.VISIBLE:View.INVISIBLE;
+        if(fab != null) fab.setVisibility(fabVisibility);
+    }
+
+    @Override
+    public void setSpinnerVisible(boolean spinnerVisible) {
+        Log.d(TAG, "SetSPinnerVisible "+spinnerVisible);
+        int spinnerVisibility = spinnerVisible?View.VISIBLE:View.INVISIBLE;
+        if(spinner != null) spinner.setVisibility(spinnerVisibility);
+    }
+
+    private void showFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+            .replace(R.id.content_main, fragment, "Main")
+            .addToBackStack(null)
+            .commit();
     }
 
     private void signOut() {
@@ -283,5 +345,4 @@ public class MainActivity extends BaseActivity
         // Google revoke access
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
     }
-
 }

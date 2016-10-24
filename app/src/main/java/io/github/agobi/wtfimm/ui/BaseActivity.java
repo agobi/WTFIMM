@@ -20,7 +20,7 @@ import io.github.agobi.wtfimm.R;
 /**
  * Created by gobi on 10/10/16.
  */
-public class BaseActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public abstract class BaseActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "BaseActivity";
 
     protected GoogleApiClient mGoogleApiClient;
@@ -53,5 +53,11 @@ public class BaseActivity extends AppCompatActivity implements GoogleApiClient.O
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    }
+
+    public void setFabVisible(boolean fabVisible) {
+    }
+
+    public void setSpinnerVisible(boolean spinnerVisible) {
     }
 }

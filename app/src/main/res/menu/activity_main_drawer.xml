@@ -24,7 +24,7 @@
             android:icon="@drawable/ic_info_black_24dp"/>
 
     </group>
-    <item android:title="Settings">
+    <item android:title="@string/action_settings">
         <menu>
             <item android:id="@+id/settings"
                 android:title="@string/action_settings"

@@ -3,9 +3,15 @@ package io.github.agobi.wtfimm;
 import android.app.Application;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
+import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -14,9 +20,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +35,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import io.github.agobi.wtfimm.model.Category;
+import io.github.agobi.wtfimm.model.MainCategory;
 import io.github.agobi.wtfimm.model.Month;
+import io.github.agobi.wtfimm.model.SubCategory;
 import io.github.agobi.wtfimm.model.Transaction;
+
+import static android.R.attr.x;
 
 public class FireBaseApplication extends Application {
     private static final String TAG = "FireBaseApplication";
@@ -33,7 +48,7 @@ public class FireBaseApplication extends Application {
     private DatabaseReference categoriesReference;
     private WTFIMMSettings mSettings;
 
-    public static final Category defaultCategory = new Category("???");
+    public static final Category defaultCategory = new MainCategory("???");
 
     public DatabaseReference getTransactions() {
         return transactionsReference;
@@ -42,7 +57,7 @@ public class FireBaseApplication extends Application {
     public interface CategoryChangeListener {
         void categoryChange(Map<String, Category> categories);
     }
-    private final List<CategoryChangeListener> categoryChangeListeners = new ArrayList<>();;
+    private final List<CategoryChangeListener> categoryChangeListeners = new ArrayList<>();
 
     public void addCategoryChangeListener(CategoryChangeListener ccl) {
         categoryChangeListeners.add(ccl);
@@ -87,14 +102,65 @@ public class FireBaseApplication extends Application {
         monthsChangeListeners.remove(monthsChangeListener);
     }
 
+    private List<Category> getDefaultCategories() throws IOException, XmlPullParserException {
+        // Create ResourceParser for XML file
+        XmlResourceParser xpp = getResources().getXml(R.xml.default_categories);
+        // check state
+        int eventType = xpp.getEventType();
+        List<Category> categories = new ArrayList<>();
+        MainCategory current = null;
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            // instead of the following if/else if lines
+            // you should custom parse your xml
+            if(eventType == XmlPullParser.START_DOCUMENT) {
+                System.out.println("Start document");
+            } else if(eventType == XmlPullParser.START_TAG) {
+                String name = xpp.getName();
+                if(name.equals("Categories")) {
+                } else if(name.equals("Category")) {
+                    current = new MainCategory(xpp.getAttributeValue(null, "name"));
+                    categories.add(current);
+                } else if(name.equals("SubCategory")) {
+                    SubCategory sub = new SubCategory(xpp.getAttributeValue(null, "name"));
+                    current.getSubcategories().put(sub.getName(), sub);
+
+                }
+            } else if(eventType == XmlPullParser.END_TAG) {
+            } else if(eventType == XmlPullParser.TEXT) {
+                System.out.println("Text "+xpp.getText());
+            }
+            eventType = xpp.next();
+        }
+        // indicate app done reading the resource.
+        xpp.close();
+
+        return categories;
+    }
+
+
     @Override
     public void onCreate() {
         super.onCreate();
 
+        try {
+            getDefaultCategories();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+
         mSettings = new WTFIMMSettings(getApplicationContext());
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
         database.setPersistenceEnabled(true);
+
+        if(months.add(new Month(new Date(), getSettings().getStartOfMonth()))) {
+            for (MonthsChangeListener m : monthsChangeListeners) {
+                m.monthsChanged(months.toArray(new Month[0]));
+            }
+        }
 
         transactionsReference = database.getReference("transactions");
         transactionsReference.keepSynced(true);
@@ -136,10 +202,31 @@ public class FireBaseApplication extends Application {
         categoriesReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "DS "+dataSnapshot.toString());
+                if(!dataSnapshot.exists()) {
+                    try {
+                        Log.d(TAG, "SAVING");
+                        List<Category> categories = getDefaultCategories();
+                        for(Category cat : categories) {
+                            Log.d(TAG, "Adding +"+cat.getName());
+                            Task t = categoriesReference.child(cat.getName()).setValue(cat);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (XmlPullParserException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 HashMap<String, Category> newData = new HashMap<String, Category>();
                 for(DataSnapshot d : dataSnapshot.getChildren()) {
-                    Category data = d.getValue(Category.class);
+                    MainCategory data = d.getValue(MainCategory.class);
                     newData.put(d.getKey(), data);
+                    if(data.getSubcategories() != null) {
+                        for (Map.Entry<String, SubCategory> sub : data.getSubcategories().entrySet()) {
+                            newData.put(d.getKey() + "/" + sub.getKey(), sub.getValue());
+                        }
+                    }
                 }
                 mCategories = newData;
                 for(CategoryChangeListener ccl : categoryChangeListeners)
@@ -168,4 +255,7 @@ public class FireBaseApplication extends Application {
     public WTFIMMSettings getSettings() {
         return mSettings;
     }
+
+
+
 }

@@ -1,6 +1,7 @@
 package io.github.agobi.wtfimm.util;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -27,16 +29,23 @@ import io.github.agobi.wtfimm.model.Transaction;
 public class TransactionListAdapter extends RecyclerView.Adapter<TransactionListAdapter.ViewHolderBase> implements ValueEventListener, FireBaseApplication.CategoryChangeListener {
     private static final int SEPARATOR = 1, TRANSACTION = 0;
     private final TRListFragment.OnClickListenerFactory onClickListenerFactory;
+    private final Query month;
     private Map<String, Category> categories;
     private ArrayList<Object> mData = new ArrayList<>();
     private static String LOG_TAG = "MyRecyclerViewAdapter";
     private FireBaseApplication app;
 
     public TransactionListAdapter(Month m, FireBaseApplication app, TRListFragment.OnClickListenerFactory onClickListenerFactory) {
-        app.getMonth(m).addValueEventListener(this);
+        month = app.getMonth(m);
+        month.addValueEventListener(this);
         app.addCategoryChangeListener(this);
         this.app = app;
         this.onClickListenerFactory = onClickListenerFactory;
+    }
+
+    public void cleanup() {
+        month.removeEventListener(this);
+        app.removeCategoryChangeListener(this);
     }
 
     public abstract class ViewHolderBase extends RecyclerView.ViewHolder {
@@ -87,8 +96,8 @@ public class TransactionListAdapter extends RecyclerView.Adapter<TransactionList
             DataSnapshot ds = (DataSnapshot) data;
             Transaction tr = ds.getValue(Transaction.class);
             trTime.setText(app.getSettings().getTimeFormat().format(tr.getDate()));
-            trSource.setText(getCategory(tr.getSource()).getName());
-            trDestination.setText(categories.get(tr.getTarget()).getName());
+            trSource.setText(tr.getSource());
+            trDestination.setText(tr.getTarget());
             trAmount.setText(Integer.toString(tr.getAmount()) + " Ft");
             trNote.setText(tr.getNote());
             itemView.setOnClickListener(factory.create(ds));
@@ -166,4 +175,5 @@ public class TransactionListAdapter extends RecyclerView.Adapter<TransactionList
         this.categories = categories;
         notifyDataSetChanged();
     }
+
 }
