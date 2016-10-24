@@ -96,8 +96,8 @@ public class TransactionListAdapter extends RecyclerView.Adapter<TransactionList
             DataSnapshot ds = (DataSnapshot) data;
             Transaction tr = ds.getValue(Transaction.class);
             trTime.setText(app.getSettings().getTimeFormat().format(tr.getDate()));
-            trSource.setText(tr.getSource());
-            trDestination.setText(tr.getTarget());
+            trSource.setText(app.getSource(tr));
+            trDestination.setText(app.getTarget(tr));
             trAmount.setText(Integer.toString(tr.getAmount()) + " Ft");
             trNote.setText(tr.getNote());
             itemView.setOnClickListener(factory.create(ds));

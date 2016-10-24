@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.xml.transform.Source;
+
 import io.github.agobi.wtfimm.model.Category;
 import io.github.agobi.wtfimm.model.MainCategory;
 import io.github.agobi.wtfimm.model.Month;
@@ -48,7 +50,7 @@ public class FireBaseApplication extends Application {
     private DatabaseReference categoriesReference;
     private WTFIMMSettings mSettings;
 
-    public static final Category defaultCategory = new MainCategory("???");
+    public static final Category defaultCategory = new MainCategory("uncategorised");
 
     public DatabaseReference getTransactions() {
         return transactionsReference;
@@ -237,9 +239,12 @@ public class FireBaseApplication extends Application {
             public void onCancelled(DatabaseError databaseError) {
 
             }
+
+
         });
 
     }
+
 
     public Query getMonth(Month m) {
         Query q = transactionsReference.orderByChild("timestamp").startAt(m.getStart()).endAt(m.getEnd());
@@ -256,6 +261,32 @@ public class FireBaseApplication extends Application {
         return mSettings;
     }
 
+    public String getSource(Transaction t) {
+        String s = t.getSource();
+        if(!getCategories().containsKey(s)) s = null;
 
+        if (s == null)
+            s = t.getGuessedSource();
+        if(!getCategories().containsKey(s)) s = null;
+
+        if (s == null)
+            s = defaultCategory.getName();
+
+        return s;
+    }
+
+    public String getTarget(Transaction t) {
+        String s = t.getTarget();
+        if(!getCategories().containsKey(s)) s = null;
+
+        if (s == null)
+            s = t.getGuessedTarget();
+        if(!getCategories().containsKey(s)) s = null;
+
+        if (s == null)
+            s = defaultCategory.getName();
+
+        return s;
+    }
 
 }

@@ -1,6 +1,7 @@
 package io.github.agobi.wtfimm.ui;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -61,7 +62,12 @@ public class OverviewFragment extends FragmentBase {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_overview, container, false);
+        View view = inflater.inflate(R.layout.fragment_overview, container, false);
+
+        Cursor cursor = getContext().getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        cursor.
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

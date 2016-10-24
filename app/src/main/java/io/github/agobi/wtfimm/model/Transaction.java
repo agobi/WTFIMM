@@ -1,7 +1,5 @@
 package io.github.agobi.wtfimm.model;
 
-import android.text.Editable;
-
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
@@ -10,7 +8,7 @@ import java.util.Date;
 public class Transaction implements Serializable {
     private long timestamp;
     private int amount;
-    private String source, target, note, emailid;
+    private String source, target, guessedSource, guessedTarget, note, emailid;
 
     public Transaction() {
     }
@@ -70,6 +68,22 @@ public class Transaction implements Serializable {
 
     public void setEmailid(String emailid) {
         this.emailid = emailid;
+    }
+
+    public String getGuessedSource() {
+        return guessedSource;
+    }
+
+    public void setGuessedSource(String guessedSource) {
+        this.guessedSource = guessedSource;
+    }
+
+    public String getGuessedTarget() {
+        return guessedTarget;
+    }
+
+    public void setGuessedTarget(String guessedTarget) {
+        this.guessedTarget = guessedTarget;
     }
 
     @Override

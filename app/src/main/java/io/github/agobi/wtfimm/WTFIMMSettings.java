@@ -10,16 +10,14 @@ import java.text.SimpleDateFormat;
  */
 
 public class WTFIMMSettings {
-    private String defaultSource;
-    private String defaultTarget;
+    private String defaultSource = "account/cash";
+    private String defaultTarget = "attila/food";
     private DateFormat dateFormat;
     private DateFormat timeFormat;
     private DateFormat monthFormat;
 
 
     public WTFIMMSettings(Context context) {
-        defaultSource = null;
-        defaultTarget = null;
         dateFormat = android.text.format.DateFormat.getLongDateFormat(context);
         timeFormat = android.text.format.DateFormat.getTimeFormat(context);
         monthFormat = new SimpleDateFormat("MMM yy");

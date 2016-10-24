@@ -61,8 +61,9 @@ public class TREditDialog extends AppCompatDialogFragment {
         FireBaseApplication app = (FireBaseApplication) getActivity().getApplication();
         List<String> keys = new ArrayList<>(app.getCategories().keySet());
         Collections.sort(keys);
-        for(String x : keys)
-            categoryIds.add(x);
+        categoryIds.clear();
+        categoryIds.add(FireBaseApplication.defaultCategory.getName());
+        categoryIds.addAll(keys);
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -103,8 +104,8 @@ public class TREditDialog extends AppCompatDialogFragment {
             timePicker.setDate(tr.getDate());
             editAmount.setText(String.valueOf(tr.getAmount()));
             editNote.setText(tr.getNote());
-            source.setSelection(getCatIndex(tr.getSource()));
-            target.setSelection(getCatIndex(tr.getTarget()));
+            source.setSelection(getCatIndex(app.getSource(tr)));
+            target.setSelection(getCatIndex(app.getTarget(tr)));
         } else {
             source.setSelection(getCatIndex(app.getSettings().getDefaultSource()));
             target.setSelection(getCatIndex(app.getSettings().getDefaultTarget()));
@@ -124,10 +125,13 @@ public class TREditDialog extends AppCompatDialogFragment {
                 })
                 .setPositiveButton(ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        tr.setAmount(Integer.parseInt(editAmount.getText().toString()));
+                        try {
+                            tr.setAmount(Integer.parseInt(editAmount.getText().toString()));
+                        } catch (NumberFormatException ex ) {
+                        }
                         tr.setDate(timePicker.getDate());
-                        tr.setSource(categoryIds.get(source.getSelectedItemPosition()));
-                        tr.setTarget(categoryIds.get(target.getSelectedItemPosition()));
+                        tr.setSource(getCategory(source.getSelectedItemPosition()));
+                        tr.setTarget(getCategory(target.getSelectedItemPosition()));
                         tr.setNote(editNote.getText().toString());
 
                         if(transactionSaveListener != null)
@@ -138,6 +142,12 @@ public class TREditDialog extends AppCompatDialogFragment {
                 ;
 
         return builder.create();
+    }
+
+    private String getCategory(int selectedItemPosition) {
+        if(selectedItemPosition != 0)
+            return categoryIds.get(selectedItemPosition);
+        return null;
     }
 
     private void addHintBehaviour(View target, final TextView targetHint) {
