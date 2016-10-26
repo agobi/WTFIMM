@@ -26,7 +26,7 @@
     </group>
     <item android:title="@string/action_settings">
         <menu>
-            <item android:id="@+id/settings"
+            <item android:id="@+id/menu_settings"
                 android:title="@string/action_settings"
                 android:icon="@drawable/ic_settings_black_24dp"/>
             <item android:id="@+id/sign_out_button"

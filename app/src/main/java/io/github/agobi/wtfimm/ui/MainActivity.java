@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -132,6 +133,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -240,14 +242,14 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.menu_budgets) {
 
         } else if (id == R.id.menu_categories) {
-
+        } else if (id == R.id.menu_settings) {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         } else if (id == R.id.menu_overview) {
             setupOverviewFragment();
         } else if (id == R.id.menu_transactions) {
             setupTRListFragment();
         } else if (id == R.id.sign_out_button) {
             signOut();
-
         } else if (id == R.id.disconnect_button) {
             revokeAccess();
         }
@@ -344,5 +346,23 @@ public class MainActivity extends BaseActivity
 
         // Google revoke access
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        Log.d(TAG, "InstanceSave");
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.d(TAG, "Resume");
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d(TAG, "Restore");
     }
 }

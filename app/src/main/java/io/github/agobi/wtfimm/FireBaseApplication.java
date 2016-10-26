@@ -1,16 +1,11 @@
 package io.github.agobi.wtfimm;
 
 import android.app.Application;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -34,15 +29,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.transform.Source;
-
 import io.github.agobi.wtfimm.model.Category;
 import io.github.agobi.wtfimm.model.MainCategory;
 import io.github.agobi.wtfimm.model.Month;
 import io.github.agobi.wtfimm.model.SubCategory;
 import io.github.agobi.wtfimm.model.Transaction;
-
-import static android.R.attr.x;
 
 public class FireBaseApplication extends Application {
     private static final String TAG = "FireBaseApplication";
@@ -144,14 +135,6 @@ public class FireBaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        try {
-            getDefaultCategories();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        }
 
         mSettings = new WTFIMMSettings(getApplicationContext());
 

@@ -1,16 +1,35 @@
 package io.github.agobi.wtfimm.ui;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.support.v4.app.Fragment;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import io.github.agobi.wtfimm.FireBaseApplication;
 import io.github.agobi.wtfimm.R;
+import io.github.agobi.wtfimm.model.Transaction;
+
+import static android.R.attr.x;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,16 +76,21 @@ public class OverviewFragment extends FragmentBase {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+//
+//    static class SMSData {
+//        long id;
+//        String body;
+//        public SMSData(Long id, String body) {
+//            this.id = id;
+//            this.body = body;
+//        }
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
-
-        Cursor cursor = getContext().getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
-        cursor.
-
         return view;
     }
 

@@ -7,6 +7,8 @@
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
+    <string name="pref_description_startofmonth" />
+    <string name="pref_title_startofmonth">Start of Month</string>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
@@ -97,6 +99,9 @@
     <string name="sign_out">Sign Out</string>
     <string name="disconnect">Disconnect</string>
     <string name="loading">Loading…</string>
+
+
+    <!-- Edit transaction -->
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="editTransaction">Edit</string>
@@ -107,6 +112,8 @@
     <string name="edit_target_hint">Target</string>
     <string name="edit_amount_hint">Amount</string>
     <string name="edit_date_hint">Date</string>
+
+    <!-- Menu items -->
     <string name="menu_transaction">Transactions</string>
     <string name="menu_accounts">Accounts</string>
     <string name="menu_overview">Overview</string>
@@ -115,5 +122,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pref_title_sep_format">Transaction List Separator Format</string>
+    <string name="pref_title_time_format">Time Format</string>
 
 </resources>
