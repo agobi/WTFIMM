@@ -9,17 +9,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-/**
- * Created by gobi on 10/21/16.
- */
-
 public class WTFIMMSettings {
-    private static final String TAG = "Preferences";
     private final SharedPreferences sp;
-    private final Locale locale;
-    private String defaultSource = "account/cash";
-    private String defaultTarget = "attila/food";
-    private DateFormat monthFormat;
 
     private static Locale getLocale() {
         if(Build.VERSION.SDK_INT>=24)
@@ -28,29 +19,29 @@ public class WTFIMMSettings {
             return Locale.getDefault();
     }
 
-    public WTFIMMSettings(Context context) {
-        locale = getLocale();
+    WTFIMMSettings(Context context) {
         sp = PreferenceManager.getDefaultSharedPreferences(context);
         PreferenceManager.setDefaultValues(context, R.xml.pref_general, false);
         PreferenceManager.setDefaultValues(context, R.xml.pref_data_sync, false);
         PreferenceManager.setDefaultValues(context, R.xml.pref_notification, false);
-        monthFormat = new SimpleDateFormat("MMM yy");
     }
 
     public String getDefaultSource() {
-        return defaultSource;
+        return "account/cash";
     }
 
     public String getDefaultTarget() {
-        return defaultTarget;
+        return "attila/food";
     }
 
     public DateFormat getDateFormat() {
-        return new SimpleDateFormat(sp.getString("sep_format", null), locale);
+        //noinspection ConstantConditions
+        return new SimpleDateFormat(sp.getString("sep_format", null), getLocale());
     }
 
     public DateFormat getTimeFormat() {
-        return new SimpleDateFormat(sp.getString("time_format", null), locale);
+        //noinspection ConstantConditions
+        return new SimpleDateFormat(sp.getString("time_format", null), getLocale());
     }
 
     public int getStartOfMonth() {
@@ -58,6 +49,6 @@ public class WTFIMMSettings {
     }
 
     public DateFormat getMonthFormat() {
-        return monthFormat;
+        return new SimpleDateFormat("MMM yy");
     }
 }
