@@ -124,5 +124,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="pref_title_sep_format">Transaction List Separator Format</string>
     <string name="pref_title_time_format">Time Format</string>
+    <string name="edit_balance_hint">Balance</string>
 
 </resources>

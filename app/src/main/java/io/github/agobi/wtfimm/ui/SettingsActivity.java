@@ -37,6 +37,7 @@ import io.github.agobi.wtfimm.R;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+    @SuppressWarnings("unused")
     private static final String TAG = "SettingsActivity";
 
     @Override

@@ -27,7 +27,7 @@ import io.github.agobi.wtfimm.R;
 import io.github.agobi.wtfimm.model.Transaction;
 import io.github.agobi.wtfimm.util.TimePickerBehaviour;
 
-public class TREditDialog extends AppCompatDialogFragment {
+public class TREditDialog extends DialogBase {
     private static final String TAG = "EditDialog";
     private static final String TRANSACTION_KEY = "TRANSACTION_KEY";
     private final List<String> categoryIds = new ArrayList<>();
@@ -148,46 +148,6 @@ public class TREditDialog extends AppCompatDialogFragment {
         if(selectedItemPosition != 0)
             return categoryIds.get(selectedItemPosition);
         return null;
-    }
-
-    private void addHintBehaviour(View target, final TextView targetHint) {
-        target.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-            int resId = hasFocus? R.style.InputLabel_Hint:R.style.InputLabel;
-            if (Build.VERSION.SDK_INT < 23) {
-                targetHint.setTextAppearance(getContext(), resId);
-            } else {
-                targetHint.setTextAppearance(resId);
-            }
-            }
-        });
-    }
-
-
-
-    @Override
-    public void onAttachFragment(Fragment childFragment) {
-        super.onAttachFragment(childFragment);
-        Log.d(TAG, "FRAGMENT"+childFragment.toString());
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Log.d(TAG, "FRAGMENT ctx"+context.toString());
-    }
-
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        super.onCancel(dialog);
-        Log.d(TAG, "Cancel");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.d(TAG, "Destroy");
     }
 
     interface TransactionSaveListener {

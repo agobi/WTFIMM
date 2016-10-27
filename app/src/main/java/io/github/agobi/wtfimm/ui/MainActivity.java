@@ -39,11 +39,17 @@ import java.util.Date;
 
 import io.github.agobi.wtfimm.FireBaseApplication;
 import io.github.agobi.wtfimm.R;
+import io.github.agobi.wtfimm.model.Balance;
 import io.github.agobi.wtfimm.model.Month;
 import io.github.agobi.wtfimm.model.Transaction;
+import io.github.agobi.wtfimm.util.AccountData;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, TRListFragment.OnTransactionSelectedListeners {
+        implements NavigationView.OnNavigationItemSelectedListener,
+            TRListFragment.OnTransactionSelectedListeners,
+            AccountsFragment.OnAccountsFragmentEventListener,
+            OverviewFragment.OnFragmentInteractionListener {
+
     private static final String TAG = "MainActivity";
     private Spinner spinner;
     private FireBaseApplication application;
@@ -238,7 +244,7 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.menu_accounts) {
-            
+            setupAccountsFragment();
         } else if (id == R.id.menu_budgets) {
 
         } else if (id == R.id.menu_categories) {
@@ -364,5 +370,31 @@ public class MainActivity extends BaseActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Log.d(TAG, "Restore");
+    }
+
+    // Accounts fragment
+    private void setupAccountsFragment() {
+        showFragment(AccountsFragment.newInstance());
+    }
+
+    private void editAccount(@Nullable final AccountData accountData) {
+        DataSnapshot data = accountData.getData();
+        Balance balance = data == null?null:data.getValue(Balance.class);
+        final DatabaseReference ref = data == null?application.getTransactions().push():data.getRef();
+        Log.d(TAG, "EDIT ACCOUNT " + ref.getKey());
+        AccountEditDialog accountEdit = AccountEditDialog.createDialog(balance);
+        accountEdit.setAccountSaveListener(new AccountEditDialog.AccountSaveListener() {
+            @Override
+            public void onAccountSave(Balance balance) {
+                ref.setValue(balance);
+            }
+        });
+
+        accountEdit.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onAccountSelected(AccountData accountData) {
+        editAccount(accountData);
     }
 }

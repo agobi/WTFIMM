@@ -39,12 +39,19 @@ public class FireBaseApplication extends Application {
     private static final String TAG = "FireBaseApplication";
     private DatabaseReference transactionsReference;
     private DatabaseReference categoriesReference;
+    private DatabaseReference balanceReference;
+
     private WTFIMMSettings mSettings;
 
-    public static final Category defaultCategory = new MainCategory("uncategorised");
+    private Map<String, Category> mCategories = new HashMap<>();
+    public static final MainCategory defaultCategory = new MainCategory("uncategorised");
 
     public DatabaseReference getTransactions() {
         return transactionsReference;
+    }
+
+    public DatabaseReference getBalance() {
+        return balanceReference;
     }
 
     public interface CategoryChangeListener {
@@ -61,17 +68,9 @@ public class FireBaseApplication extends Application {
         categoryChangeListeners.remove(ccl);
     }
 
-    private Map<String, Category> mCategories = new HashMap<>();
 
     public Map<String, Category> getCategories() {
         return mCategories;
-    }
-
-
-    public static String getDay(Long timestamp) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(timestamp*1000);
-        return DateFormat.format("MM-dd", cal).toString();
     }
 
     public interface MonthsChangeListener {
@@ -147,6 +146,9 @@ public class FireBaseApplication extends Application {
             }
         }
 
+        balanceReference = database.getReference("balance");
+        balanceReference.keepSynced(true);
+
         transactionsReference = database.getReference("transactions");
         transactionsReference.keepSynced(true);
         transactionsReference.addChildEventListener(new ChildEventListener() {
@@ -196,9 +198,7 @@ public class FireBaseApplication extends Application {
                             Log.d(TAG, "Adding +"+cat.getName());
                             Task t = categoriesReference.child(cat.getName()).setValue(cat);
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (XmlPullParserException e) {
+                    } catch (IOException | XmlPullParserException e) {
                         e.printStackTrace();
                     }
                 }

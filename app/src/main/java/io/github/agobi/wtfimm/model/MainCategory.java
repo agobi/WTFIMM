@@ -3,13 +3,11 @@ package io.github.agobi.wtfimm.model;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by gobi on 10/21/16.
- */
 public class MainCategory implements Category {
     private String name;
     private Map<String, SubCategory> subcategories;
 
+    @SuppressWarnings("unused")
     public MainCategory() {
     }
 
