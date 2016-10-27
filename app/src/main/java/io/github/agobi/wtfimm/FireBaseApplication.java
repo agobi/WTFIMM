@@ -245,13 +245,8 @@ public class FireBaseApplication extends Application {
     }
 
     public String getSource(Transaction t) {
-        String s = t.getSource();
+        String s = t.source();
         if(!getCategories().containsKey(s)) s = null;
-
-        if (s == null)
-            s = t.getGuessedSource();
-        if(!getCategories().containsKey(s)) s = null;
-
         if (s == null)
             s = defaultCategory.getName();
 
@@ -259,13 +254,8 @@ public class FireBaseApplication extends Application {
     }
 
     public String getTarget(Transaction t) {
-        String s = t.getTarget();
+        String s = t.target();
         if(!getCategories().containsKey(s)) s = null;
-
-        if (s == null)
-            s = t.getGuessedTarget();
-        if(!getCategories().containsKey(s)) s = null;
-
         if (s == null)
             s = defaultCategory.getName();
 
