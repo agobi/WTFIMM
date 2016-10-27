@@ -10,6 +10,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -138,31 +139,45 @@ public abstract class BalanceAdapter<T extends RecyclerView.ViewHolder> extends 
         public DataSnapshot getData() {
             return data;
         }
+
+
+        void cleanup() {
+            if(query != null)
+                query.removeEventListener(transactionListener);
+        }
     }
 
     protected abstract void onCancelled(DatabaseError databaseError);
 
     private final FireBaseApplication app;
-    protected final List<AccountData> data = new ArrayList<>();
+    protected final List<AdapterAccountData> accountData = new ArrayList<>();
 
     public BalanceAdapter(FireBaseApplication app) {
         this.app = app;
     }
 
     public void addAccount(String name) {
-        for(AccountData d : data) {
+        for(AccountData d : accountData) {
             if(name.equals(d.getName()))
                 return;
         }
 
-        int pos = data.size();
-        data.add(new AdapterAccountData(name, pos));
+        int pos = accountData.size();
+        accountData.add(new AdapterAccountData(name, pos));
 
         notifyItemInserted(pos);
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return accountData.size();
+    }
+
+    public void cleanup() {
+        Iterator<BalanceAdapter<T>.AdapterAccountData> it = accountData.iterator();
+        while(it.hasNext())
+            it.next().cleanup();
+
+        accountData.clear();
     }
 }

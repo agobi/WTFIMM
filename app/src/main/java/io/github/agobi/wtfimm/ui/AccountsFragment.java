@@ -134,7 +134,7 @@ public class AccountsFragment extends Fragment implements FireBaseApplication.Ca
 
         @Override
         public void onBindViewHolder(AccountAdapter.ViewHolder holder, int position) {
-            AccountData accountData = data.get(position);
+            AccountData accountData = this.accountData.get(position);
             holder.accountData = accountData;
             holder.name.setText(accountData.getName());
             holder.balance.setText(Long.toString(accountData.getBalance()));
@@ -152,6 +152,13 @@ public class AccountsFragment extends Fragment implements FireBaseApplication.Ca
 
     interface OnAccountsFragmentEventListener {
         void onAccountSelected(AccountData accountData);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(adapter != null)
+            adapter.cleanup();
     }
 }
 

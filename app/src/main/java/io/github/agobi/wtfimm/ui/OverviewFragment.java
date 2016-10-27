@@ -1,9 +1,7 @@
 package io.github.agobi.wtfimm.ui;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -142,7 +140,7 @@ public class OverviewFragment extends FragmentBase implements FireBaseApplicatio
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            AccountData accountData = data.get(position);
+            AccountData accountData = this.accountData.get(position);
             holder.name.setText(accountData.getName());
             holder.amount.setText(Long.toString(accountData.getBalance()));
         }
@@ -150,5 +148,12 @@ public class OverviewFragment extends FragmentBase implements FireBaseApplicatio
         @Override
         protected void onCancelled(DatabaseError databaseError) {
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(adapter != null)
+            adapter.cleanup();
     }
 }
