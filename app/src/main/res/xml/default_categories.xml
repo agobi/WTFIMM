@@ -17,4 +17,13 @@
         <SubCategory name="dinner"/>
         <SubCategory name="shop" />
     </Category>
+
+    <Category name="cigarette"/>
+
+    <Category name="attila">
+        <SubCategory name="lunch"/>
+        <SubCategory name="health"/>
+        <SubCategory name="other"/>
+    </Category>
+
 </Categories>

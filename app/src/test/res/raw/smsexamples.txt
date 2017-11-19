@@ -1,0 +1,50 @@
+1476782016 2862 account/maestro null CENTER E'TTEREM BUDAPEST HU
+1476782020 3453 Cirrus Maestro POS tranzakciò  2 862 Ft Idöpont: 2016.10.18 11:13:36 E: 478 586 Ft Hely: CENTER E'TTEREM BUDAPEST HU
+
+1435769224 39000 account/maestro account/cash KOSSUTH TER 10. BUDAPEST HU
+1435769227 1788 Cirrus Maestro ATM tranzakciò  39 000 Ft Idöpont: 2015.07.01 18:47:04 E: 1 554 108 Ft Hely: KOSSUTH TER 10. BUDAPEST HU
+
+
+
+1476127840 3033 account/mastercard null Netflix.com Amsterdam NL
+1476130007 3431 Befektetési POS tranzakciò  3 033 Ft Idöpont: 2016.10.10 21:30:40 E: 29 305 Ft Hely: Netflix.com Amsterdam NL
+
+1433489856 40000 account/mastercard account/cash KOSSUTH TER 10. BUDAPEST HU
+1433489860 1651 Befektetési ATM tranzakciò  40 000 Ft Idöpont: 2015.06.05 09:37:36 E: 128 496 Ft Hely: KOSSUTH TER 10. BUDAPEST HU
+
+
+
+1473400316 50000 null account/mastercard GOBI SÅNDORNÉ\nszàmìtògéphez
+1473400316 3328 Bef kàrtya szla (696718) utalàs érkezett 50 000 Ft 2016.09.09 E: 50 031 Ft Küldö: GOBI SÅNDORNÉ Közl: szàmìtògéphez
+
+1434620279 750000 null account/maestro Budapest Bank ZRT Kecsk
+1434620279 1695 HUF fizetési szàmla (696718) készpénz befizetés 750 000 Ft Hely: Budapest Bank ZRT Kecsk 2015.06.18 E: 1 389 339 Ft
+
+1476712982 8256 null account/maestro UJ PILLÉR ÖNKÉNTES KÖLCSÖNÖS K\nUj Pillér Egp. Szolgàltat2016.10
+1476712982 3452 HUF fizetési szàmla (696718) utalàs érkezett 8 256 Ft 2016.10.17 E: 481 448 Ft Küldö: UJ PILLÉR ÖNKÉNTES KÖLCSÖNÖS K Közl: Uj Pillér Egp. Szolgàltat2016.10
+
+1473658238 7050 account/maestro null NAV EGÉSZSÉGBIZTOSITÅSI ALAP\nVEZÉR BOGLÅRKA 8
+1473658238 3331 HUF fizetési szàmla (696718) àllandò utalàsi megbìzàs teljesült 7 050 Ft 2016.09.12 E: 430 713 Ft Kedv.: NAV EGÉSZSÉGBIZTOSITÅSI ALAP Közl: VEZÉR BOGLÅRKA 8
+
+1433481217 110000 account/maestro null Gòbi Attila
+1433481217 1648 HUF fizetési szàmla (696718) utalàsi megbìzàs teljesült 110 000 Ft 2015.06.05 E: 639 339 Ft Kedv.: Gòbi Attila
+
+1468047726 300 null account/maestro MV-START BUDAPEST BP0
+1468047726 3110 Cirrus Maestro utòlagos jòvàiràs 300 HUF  Idöpont: 2016.07.07. Hely: MV-START BUDAPEST BP0
+
+
+null
+1436353438 1798 Sikertelen Cirrus Maestro ATM tranzakciò  199 000 Ft Idöpont: 2015.07.08 13:03:56 E: 1 540 116 Ft Hely: NYUGATI TER 4-5. BUDAPEST HU
+null
+1436781022 1818 Sikertelen Cirrus Maestro POS tranzakciò  6 730 Ft Idöpont: 2015.07.13 11:50:17 E: 1 135 650 Ft Hely: ECSEKK BUDAPEST HU
+null
+1470389180 3212 Törölt Cirrus Maestro POS jòvàìràs 5 787 Ft Idöpont: 2016.08.05 11:25:51 E: 120 652 Ft Hely: CENTER E'TTEREM BUDAPEST HU
+null
+1435343084 1750 Törölt Befektetési POS jòvàìràs 33 Ft Idöpont: 2015.06.26 20:17:03 E: 53 353 Ft Hely: UL Koll.trafik Stockholm SE
+null
+1435241447 1729 Sikertelen Befektetési POS tranzakciò  1 291 Ft Idöpont: 2015.06.25 16:10:43 E: 0 Ft Hely: LYCAMOBILE WWW.LYCAMOBIL SE
+
+null
+1475737283 3414 Budapest Internetbank forint àtutalàs. Célszàmla: 11702036-20278667-, Összeg: 180000 Ft. Jòvàhagyò kòd: er98jm39
+null
+1475736986 3412 Az Ön belépési kòdja: mk98um64 Ezt a belépéshez 2016.10.06 09:06:24-ig hasznàlhatja. Kapcsolat azonosìtò: 085624 Budapest Bank

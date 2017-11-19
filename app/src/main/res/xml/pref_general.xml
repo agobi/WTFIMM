@@ -9,25 +9,41 @@
         android:inputType="number"
         android:title="@string/pref_title_startofmonth"/>
 
-    <io.github.agobi.wtfimm.util.DateFormatPreference
-        android:key="sep_format"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        dateTimeFormat="date"
-        android:title="@string/pref_title_sep_format" />
 
-    <io.github.agobi.wtfimm.util.DateFormatPreference
-        android:key="time_format"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        dateTimeFormat="time"
-        android:title="@string/pref_title_time_format" />
+    <PreferenceCategory
+        android:title="@string/pref_title_datetimeformat">
+        <io.github.agobi.wtfimm.util.DateFormatPreference
+            android:key="sep_format"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            dateTimeFormat="date"
+            android:title="@string/pref_title_sep_format" />
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="example_switch"
-        android:summary="@string/pref_description_social_recommendations"
-        android:title="@string/pref_title_social_recommendations" />
+        <io.github.agobi.wtfimm.util.DateFormatPreference
+            android:key="time_format"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            dateTimeFormat="time"
+            android:title="@string/pref_title_time_format" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_categorizer">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="categorizer_enable"
+            android:title="@string/pref_title_categorizer_enable" />
+
+        <EditTextPreference
+            android:dependency="categorizer_enable"
+            android:inputType="phone"
+            android:key="categorizer_sender"
+            android:summary="@string/pref_description_categorizer_sender"
+            android:title="@string/pref_title_categorizer_sender" />
+
+    </PreferenceCategory>
 
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->

@@ -1,0 +1,66 @@
+//        String[] reqCols = new String[] { "_id", "address", "body" };
+//
+//        List<String> lstSms = new ArrayList<String>();
+//        ContentResolver cr = getActivity().getContentResolver();
+//
+////        final TreeMap<Long, SMSData> sms = new TreeMap<>();
+//
+//        Cursor c = cr.query(Telephony.Sms.Inbox.CONTENT_URI, // Official CONTENT_URI from docs
+//                new String[] { Telephony.Sms.Inbox._ID, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.DATE }, // Select body text
+//                "address = ?",
+//                new String[] {"+36309266245"},
+//                Telephony.Sms.Inbox.DEFAULT_SORT_ORDER);
+//
+//        if (c.moveToFirst()) {
+//            do {
+//                long ts = c.getLong(3) / 1000;
+//                long id = c.getLong(0);
+//                String body = c.getString(1);
+//                Log.d(TAG, ts+" "+id+" "+body);
+////                sms.put(ts, new SMSData(id, body));
+//            }while(c.moveToNext());
+//        } else {
+//            throw new RuntimeException("You have no SMS in Inbox");
+//        }
+//        c.close();
+////
+////        FireBaseApplication app = (FireBaseApplication) getActivity().getApplication();
+////        ChildEventListener childEventListener = app.getTransactions().addChildEventListener(new ChildEventListener() {
+////            @Override
+////            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+////                Transaction tr = dataSnapshot.getValue(Transaction.class);
+////                long ts = tr.getTimestamp();
+////                SortedMap<Long, SMSData> submap = sms.subMap(ts - 3600, ts + 3600);
+////                String d = SimpleDateFormat.getDateTimeInstance().format(tr.getDate());
+////                Log.d(TAG, "SEARCHING: [" + d + "] " +tr.getAmount() + " / " + tr.getNote());
+////                for (Map.Entry<Long, SMSData> x : submap.entrySet()) {
+////                    d = SimpleDateFormat.getDateTimeInstance().format(new Date(x.getKey()*1000));
+////                    Log.d(TAG, "      ? " + d + "/" +x.getValue().body);
+////                }
+////            }
+////
+////            @Override
+////            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+////
+////            }
+////
+////            @Override
+////            public void onChildRemoved(DataSnapshot dataSnapshot) {
+////
+////            }
+////
+////            @Override
+////            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+////
+////            }
+////
+////            @Override
+////            public void onCancelled(DatabaseError databaseError) {
+////
+////            }
+////        });
+//
+
+
+        ActivityCompat.shouldShowRequestPermissionRationale(this, "android.permission.READ_SMS");
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.READ_SMS"}, REQUEST);

@@ -10,10 +10,10 @@
     <string name="pref_description_startofmonth" />
     <string name="pref_title_startofmonth">Start of Month</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
+    <string name="pref_title_categorizer_enable">Enable SMS</string>
+
+    <string name="pref_title_categorizer_sender">Sender</string>
+    <string name="pref_description_categorizer_sender">Enable scanning incoming Short Texts</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
@@ -125,5 +125,7 @@
     <string name="pref_title_sep_format">Transaction List Separator Format</string>
     <string name="pref_title_time_format">Time Format</string>
     <string name="edit_balance_hint">Balance</string>
+    <string name="pref_title_categorizer">Data Collection</string>
+    <string name="pref_title_datetimeformat">Date and time formatting</string>
 
 </resources>

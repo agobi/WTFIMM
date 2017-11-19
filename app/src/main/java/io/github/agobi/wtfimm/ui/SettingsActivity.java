@@ -4,6 +4,7 @@ package io.github.agobi.wtfimm.ui;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -16,14 +17,19 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
+import android.support.v13.app.FragmentCompat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
 
 import io.github.agobi.wtfimm.R;
+import io.github.agobi.wtfimm.util.TextCategorizer;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -36,7 +42,7 @@ import io.github.agobi.wtfimm.R;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends AppCompatPreferenceActivity {
+public class SettingsActivity extends AppCompatPreferenceActivity implements ActivityCompat.OnRequestPermissionsResultCallback  {
     @SuppressWarnings("unused")
     private static final String TAG = "SettingsActivity";
 
@@ -197,6 +203,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+
+        private static final int REQUEST = 1;
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            Log.d(TAG, "Perm "+REQUEST+" "+grantResults[0]+" "+permissions[0]);
+
+            if(requestCode == REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                ((SwitchPreference)findPreference("categorizer_enable")).setChecked(true);
+        }
+
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -211,7 +231,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindIntPreferenceSummaryToValue(findPreference("startofmonth"));
             bindPreferenceSummaryToValue(findPreference("sep_format"));
             bindPreferenceSummaryToValue(findPreference("time_format"));
+            bindPreferenceSummaryToValue(findPreference("categorizer_sender"));
+            Preference enable = findPreference("categorizer_enable");
+            enable.setEnabled(TextCategorizer.getInstance() != null);
+            enable.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    if(newValue.equals(true) && FragmentCompat.shouldShowRequestPermissionRationale(
+                            GeneralPreferenceFragment.this, "android.permission.READ_SMS")) {
 
+                        FragmentCompat.requestPermissions(GeneralPreferenceFragment.this,
+                                new String[]{"android.permission.READ_SMS"}, REQUEST);
+                        return false;
+                    }
+
+                    return true;
+                }
+            });
         }
 
         @Override
